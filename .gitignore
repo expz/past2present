@@ -1,0 +1,11 @@
+.cache
+.conda
+.ipython
+.ipynb_checkpoints
+.jupyter
+.keras
+.local
+.pytest_cache
+__pycache__
+*.egg-info
+*.pyc
