@@ -217,13 +217,8 @@ class _GutenbergSource(filebasedsource.FileBasedSource):
         # Replace carraige return and tab characters.
         text = text.replace(u'\r\n', u'\n').replace(u'\r', u'\n')
         text = text.replace(u'\t', u' ')
-        # Standardize quotes/apostrophes.
-        text = re.sub(ur"[’‘]",  # noqa: E999
-                      u"'",
-                      re.sub(ur"[ ]*`", u"'", text))
-        text = re.sub(ur'[“”]', u'"', text)
         # Standardize en/em-dashes.
-        text = re.sub(ur'[–—]', u'-', text)
+        text = re.sub(ur'[–—]', u'-', text)  # noqa: E999
         # Replace non-ASCII characters with a space.
         text = re.sub(ur'[^\x00-\x7F]+', ' ', text)
         # Remove play character prompts like 'WALTER: ...'
@@ -243,6 +238,17 @@ class _GutenbergSource(filebasedsource.FileBasedSource):
         text = re.sub(u'^[ ]+', u'', text)
         # Remove all line breaks except empty lines.
         text = re.sub(u'\n(?=[^\n])', u' ', text, flags=re.M)
+        # Standardize quotes/apostrophes.
+        text = re.sub(ur"(?<=[^s])[’']$|(?<=[^s])[’'](?=[^a-zA-Z])",  # noqa
+                      '"',
+                      text)
+        text = re.sub(ur"^[ ]*[‘`']|[(?<=[,:] )[‘`']|(?<=[,:])[‘`']",
+                      '"',
+                      text)
+        text = re.sub(ur"[’‘]",  # noqa: E999
+                      u"'",
+                      re.sub(ur"[ ]*`", u"'", text))
+        text = re.sub(ur'[“”]', u'"', text)
         # Remove footnotes and references.
         # (they can be nested one deep: [Note [Note in note]])
         text = re.sub(  # noqa: W605
