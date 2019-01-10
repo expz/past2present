@@ -19,6 +19,7 @@ from apache_beam.options.pipeline_options import SetupOptions
 from apache_beam.transforms import PTransform
 
 import benepar
+from benepar.base_parser import SENTENCE_MAX_LEN
 from benepar.spacy_plugin import BeneparComponent
 from collections import namedtuple
 from past2present import Sentence
@@ -158,7 +159,7 @@ class SpacySentenceSpan(SpacySpan):
 
 class ParseWithSpacy(beam.DoFn):
     DEFAULT_BATCH_SIZE = 16
-    DEFAULT_N_THREADS = 2
+    DEFAULT_N_THREADS = -1  # OpenMP decides.
     MIN_SENTENCE_CHAR_LENGTH = 5
 
     def process(self, doc_string, *args, **kwargs):
@@ -169,10 +170,19 @@ class ParseWithSpacy(beam.DoFn):
         doc_strings = [doc_string]
         docs = self.nlp.pipe(doc_strings,
                              batch_size=batch_size,
-                             n_threads=n_threads)
+                             n_threads=n_threads,
+                             disable=['ner', 'textcat', 'benepar'])
         benepar = self.nlp.get_pipe('benepar')
-        docs = map(benepar, docs)
         for doc in docs:
+            # Ignore docs which have a sentence with too many tokens.
+            ignore = False
+            for sent in doc.sents:
+                if len(sent) + 2 >= SENTENCE_MAX_LEN:
+                    ignore = True
+                    break
+            if ignore:
+                continue
+            doc = benepar(doc)
             for sent in doc.sents:
                 if len(sent.text) >= 5:
                     yield SpacySentenceSpan(sent)
@@ -213,14 +223,15 @@ class _GutenbergSource(filebasedsource.FileBasedSource):
         """
         All non-ASCII characters must be removed for benepar `parse_string`
         to work.
+
+        Remember that regexp's that have a match beginning or end of line
+        need to have the re.M flag to work properly!
         """
         # Replace carraige return and tab characters.
         text = text.replace(u'\r\n', u'\n').replace(u'\r', u'\n')
         text = text.replace(u'\t', u' ')
         # Standardize en/em-dashes.
         text = re.sub(ur'[–—]', u'-', text)  # noqa: E999
-        # Replace non-ASCII characters with a space.
-        text = re.sub(ur'[^\x00-\x7F]+', ' ', text)
         # Remove play character prompts like 'WALTER: ...'
         text = re.sub(ur"^[A-Z0-9'., ]+(?:\([^)]*\))?[:.][ ]*",  # noqa
                       u'',
@@ -235,20 +246,26 @@ class _GutenbergSource(filebasedsource.FileBasedSource):
             re.sub(u':--', u':', re.sub('&c', 'etc', text)),
             flags=re.M)
         # Remove leading spaces.
-        text = re.sub(u'^[ ]+', u'', text)
+        text = re.sub(u'^[ ]+', u'', text, flags=re.M)
         # Remove all line breaks except empty lines.
         text = re.sub(u'\n(?=[^\n])', u' ', text, flags=re.M)
+        # Remove leading spaces.
+        text = re.sub(u'^[ ]+', u'', text, flags=re.M)
         # Standardize quotes/apostrophes.
-        text = re.sub(ur"(?<=[^s])[’']$|(?<=[^s])[’'](?=[^a-zA-Z])",  # noqa
-                      '"',
-                      text)
-        text = re.sub(ur"^[ ]*[‘`']|[(?<=[,:] )[‘`']|(?<=[,:])[‘`']",
-                      '"',
-                      text)
-        text = re.sub(ur"[’‘]",  # noqa: E999
-                      u"'",
-                      re.sub(ur"[ ]*`", u"'", text))
         text = re.sub(ur'[“”]', u'"', text)
+        if u'"' in text:
+            text = re.sub(ur"`[ ]*", u"'", text)
+        else:
+            text = re.sub(ur"(?<=[^s])[’']$|(?<=[^s])[’'](?=[^a-zA-Z])",  # noqa
+                          '"',
+                          text, flags=re.M)
+            text = re.sub(ur"^[ ]*[‘`']|(?<=[].!?;>)'’\",:] )[‘`']|"
+                          + ur"(?<=[].!?;>)'’\",:])[‘`']",
+                          '"',
+                          text, flags=re.M)
+        text = re.sub(ur"[’‘`]", u"'", text)  # noqa: E999
+        # Replace non-ASCII characters with a space.
+        text = re.sub(ur'[^\x00-\x7F]+', ' ', text)
         # Remove footnotes and references.
         # (they can be nested one deep: [Note [Note in note]])
         text = re.sub(  # noqa: W605

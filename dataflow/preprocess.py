@@ -16,7 +16,7 @@ def get_next_chunk_no(outfile_dir, outfile_prefix):
 
 
 def split_files(infile_dir, outfile_dir, outfile_prefix):
-    for fn in glob.glob("%s/*.txt" % (infile_dir,)):
+    for fn in sorted(glob.glob("%s/*.txt" % (infile_dir,))):
         with open(fn, 'r') as f:
             chunk_lines = []
             chunk_no = get_next_chunk_no(outfile_dir, outfile_prefix)
