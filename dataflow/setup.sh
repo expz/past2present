@@ -19,4 +19,7 @@ python -m spacy download en_core_web_sm
 
 python -c "import benepar; benepar.download('benepar_en')"
 
+sed -i -e "s/SENTENCE_MAX_LEN = .*/SENTENCE_MAX_LEN = 10000/g" \
+    "$(dirname $(which python))/../lib/python2.7/site-packages/benepar/base_parser.py"
+
 export GOOGLE_APPLICATION_CREDENTIALS="$(readlink -f ./***REMOVED***)"

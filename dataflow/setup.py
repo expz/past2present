@@ -84,7 +84,7 @@ CUSTOM_COMMANDS = [
     ['python', '-m', 'spacy', 'download', 'en_core_web_sm'],
     # Requires Cython and Numpy but does not list them as dependencies.
     ['pip', 'install', 'benepar[cpu]'],
-    ['python', '-c', 'import benepar; benepar.download("benepar_en")']
+    ['python', '-c', 'import benepar; benepar.download("benepar_en")'],
     ]
 
 
