@@ -1,3 +1,8 @@
-requests
+cython      # For benepar
+feedparser  # For pattern
+future      # For pattern
+nltk        # For pattern
+numpy       # For benepar
+pytest<5.0
 spacy
-pyswip
+-e .

@@ -123,15 +123,13 @@ class CustomCommands(setuptools.Command):
 # so this dependency will not trigger anything to be installed unless a version
 # restriction is specified.
 REQUIRED_PACKAGES = [
+    'apache_beam[gcp]',
     'cython',
     'feedparser',
     'future',
-    'msgpack==0.5.6',
     'nltk',
     'numpy',
-    'scipy',
-    'spacy',
-    'tensorflow'
+    'spacy'
     ]
 
 

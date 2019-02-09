@@ -1,12 +1,12 @@
 #!/bin/bash
 
-export GOOGLE_APPLICATION_CREDENTIALS="$(readlink -f ./***REMOVED***)"
+SCRIPT_DIR="$(dirname "$(readlink -f "0")")"
 
-# export RAW_DATA_DIR='/home/user/nosync/data/gutenberg-corpus/raw'
-# export CHUNK_DATA_DIR='/home/user/nosync/data/gutenberg-corpus/chunk'
-export RAW_DATA_DIR='./data-raw'
-export CHUNK_DATA_DIR='./data'
-export OUTPUT_DIR='./sents'
+# RAW_DATA_DIR="$HOME/nosync/data/gutenberg-corpus/raw"
+# CHUNK_DATA_DIR="$HOME/nosync/data/gutenberg-corpus/chunk"
+RAW_DATA_DIR="$SCRIPT_DIR/raw"
+CHUNK_DATA_DIR="$SCRIPT_DIR/chunks"
+OUTPUT_DIR="$SCRIPT_DIR/output"
 
 read_char() {
   stty -icanon -echo
@@ -15,7 +15,7 @@ read_char() {
   echo "$char"
 }
 
-source venv/bin/activate
+source "$SCRIPT_DIR/venv/bin/activate"
 
 echo -n "Preprocess data in $RAW_DATA_DIR into chunks (y/n)? "
 read_char char
@@ -33,8 +33,8 @@ if [ "$char" = 'y' ]; then
     --output "$OUTPUT_DIR/dataset"
 
   echo
-  echo '*********************************************'
+  echo '******************************************************'
   echo "Output written to $(readlink -f $OUTPUT_DIR)/dataset-*"
-  echo '*********************************************'
+  echo '******************************************************'
   echo
 fi

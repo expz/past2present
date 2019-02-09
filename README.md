@@ -1,11 +1,19 @@
 # Past2Present
 
-This project has two main functions:
+Transform English sentences so that past tense becomes present tense.
 
-1. Build a dataset of sentences in their original form and transformed to present tense if they were past tense, e.g.
-  ```
-  < There was a boy.
-  > There is a boy
-  ```
+This project has two parts.
 
-2. Train a neural network to perform the translation from past to present directly (and preserve sentences which are not in past tense).
+1. Transform sentences using Apache Beam locally or alternatively using Google Dataflow (Google's version of Beam) in the cloud.
+
+    This has an example of running a job on Apache Beam/Google Dataflow using NLP libraries `spacy` and `benepar`. Not all classes are serializable, and this has an example workaround of creating custom serializable classes.
+
+2. Transform sentences using Spark by running on Google Dataproc (Google's version of Spark) in the cloud. [INCOMPLETE]
+
+## How it works
+
+See the documentation in the subfolders. Run it on a document, and it will parse it into sentences and write them in the form:
+```
+< There was a girl.
+> There is a girl.
+```
