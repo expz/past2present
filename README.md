@@ -1,5 +1,7 @@
 # Past2Present
 
+__WARNING:__ The jupyter notebooks have not been kept up and probably will not work well. Use the scripts in the subdirectories.
+
 Transform past to present in English sentences so that past tense becomes present tense and all other tenses stay the same. The transformation is accomplished using standard NLP libraries together with some intricate reasoning based on patterns in empirical data. Accuracy is demonstrated using a test suite. Mixed tenses joined by conjunction are not supported. ("I read yesterday and today read the same book.")
 
 This project has two parts.
