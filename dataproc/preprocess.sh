@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CLUSTER='cluster-1'
-BUCKET='gs://***REMOVED***'
+BUCKET='gs://my-bucket'
 
 read_char() {
   stty -icanon -echo
@@ -32,7 +32,7 @@ fi
 echo -n "Upload files to bucket $BUCKET (y/n)? "
 read_char char
 if [ "$char" = 'y' ]; then
-  gsutil cp -J preprocess.py past2present.py "$DATAFILE" 'gs://***REMOVED***'
+  gsutil cp -J preprocess.py past2present.py "$DATAFILE" "$BUCKET"
 fi
 
 echo -n "Submit PySpark job to preprocess $DATAFILE (y/n)? "

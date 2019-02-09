@@ -313,16 +313,18 @@ class ReadGutenbergText(PTransform):
 def run(argv=None):
     """Main entry point."""
 
+    DEFAULT_BUCKET = 'gs://my-bucket'
+
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '--input',
         dest='input',
-        default='gs://***REMOVED***/gutenberg/small/*.txt',
+        default=DEFAULT_BUCKET + '/gutenberg/small/*.txt',
         help='Input file to process.')
     parser.add_argument(
         '--output',
         dest='output',
-        default='gs://***REMOVED***/past2present/sentences',
+        default=DEFAULT_BUCKET + '/past2present/sentences',
         help='Output file to write results to.')
     parser.add_argument(
         '--cloud',
